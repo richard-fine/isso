@@ -38,12 +38,11 @@ class Comments:
         database values.
         """
 
+        ref = None
         if c.get("parent") is not None:
             ref = self.get(c["parent"])
-            if ref.get("parent") is not None:
-                c["parent"] = ref["parent"]
 
-        self.db.execute([
+        new_id = self.db.execute_returnid([
             'INSERT INTO comments (',
             '    tid, parent,'
             '    created, modified, mode, remote_addr,',
@@ -61,8 +60,8 @@ class Comments:
         )
 
         return dict(zip(Comments.fields, self.db.execute(
-            'SELECT *, MAX(c.id) FROM comments AS c INNER JOIN threads ON threads.uri = ?',
-            (uri, )).fetchone()))
+            'SELECT * FROM comments AS c INNER JOIN threads ON threads.uri = ? WHERE c.id = ?',
+            (uri, new_id)).fetchone()))
 
     def activate(self, id):
         """

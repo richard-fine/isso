@@ -369,7 +369,7 @@ class API(object):
             except ValueError:
                 return BadRequest("parent should be integer")
         else:
-            args['parent'] = None
+            args['parent'] = 'any'
             root_id = None
 
         plain = request.args.get('plain', '0') == '0'
@@ -404,22 +404,22 @@ class API(object):
             for comment in rv['replies']:
                 if comment['id'] in reply_counts:
                     comment['total_replies'] = reply_counts[comment['id']]
-                    if nested_limit is not None:
-                        if nested_limit > 0:
-                            args['parent'] = comment['id']
-                            args['limit'] = nested_limit
-                            replies = list(self.comments.fetch(**args))
-                        else:
-                            replies = []
-                    else:
-                        args['parent'] = comment['id']
-                        replies = list(self.comments.fetch(**args))
+        #            if nested_limit is not None:
+        #                if nested_limit > 0:
+        #                    args['parent'] = comment['id']
+        #                    args['limit'] = nested_limit
+        #                    replies = list(self.comments.fetch(**args))
+        #                else:
+        #                    replies = []
+        #            else:
+        #                args['parent'] = comment['id']
+        #                replies = list(self.comments.fetch(**args))
                 else:
                     comment['total_replies'] = 0
-                    replies = []
+        #           replies = []
 
-                comment['hidden_replies'] = comment['total_replies'] - len(replies)
-                comment['replies'] = self._process_fetched_list(replies, plain)
+        #       comment['hidden_replies'] = comment['total_replies'] - len(replies)
+        #       comment['replies'] = self._process_fetched_list(replies, plain)
 
         return JSON(rv, 200)
 

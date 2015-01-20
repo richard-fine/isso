@@ -61,6 +61,16 @@ class SQLite3:
         with sqlite3.connect(self.path) as con:
             return con.execute(sql, args)
 
+    def execute_returnid(self, sql, args=()):
+    
+        if isinstance(sql, (list, tuple)):
+            sql = ' '.join(sql)
+
+        with sqlite3.connect(self.path) as con:
+            cursor = con.cursor()
+            cursor.execute(sql, args)
+            return cursor.lastrowid
+
     @property
     def version(self):
         return self.execute("PRAGMA user_version").fetchone()[0]

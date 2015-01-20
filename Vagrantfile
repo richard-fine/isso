@@ -17,9 +17,8 @@
 # to get into the VM. Useful info about it:
 #
 # * Running Ubuntu 14.04
-# * Isso is running on uWSGI via port 8080
-# * Actual webserver is Apache2, using mod_proxy_uwsgi to talk to uWSGI
-# * uWSGI log file is /tmp/uwsgi.log
+# * Isso is running via port 8080
+# * Actual webserver is Apache2, using mod_proxy to talk to Isso
 # * Isso DB file is /tmp/isso/comments.db
 # * Isso log file is /tmp/isso/isso.log
 #
@@ -29,6 +28,7 @@ $bootstrap = <<BOOTSTRAP
   apt-get update
   apt-get install -y apache2 curl build-essential python-setuptools python-dev sqlite3 git python-pip
   a2enmod proxy
+  a2enmod proxy_http
   service apache2 restart
 
   curl -sL https://deb.nodesource.com/setup | bash -
@@ -43,14 +43,10 @@ $bootstrap = <<BOOTSTRAP
 
   ln -s /vagrant/isso/demo /var/www/isso
 
-  pip install uwsgi
   mkdir -p /tmp/isso/spool
 
-  uwsgi --socket 127.0.0.1:8080 --master --processes 4 --cache2 name=hash,items=1024,blocksize=32 --spooler /tmp/isso/spool --module isso.run --env ISSO_SETTINGS=/vagrant/share/isso-dev.conf --daemonize /tmp/uwsgi.log --py-autoreload 1 
-  chmod a+r /tmp/uwsgi.log
+  isso -c /vagrant/share/isso-dev.conf run &
   
-  apt-get install libapache2-mod-proxy-uwsgi
-
   cp /vagrant/share/isso-dev.local.apache-conf /etc/apache2/sites-available/isso-dev.local.conf
   a2ensite isso-dev.local
   a2dissite 000-default
